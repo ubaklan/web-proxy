@@ -2,8 +2,7 @@ from flask import Flask, request, jsonify
 import requests
 from http.client import HTTPConnection
 import socket
-from dongle_lte_api import Dongle
-import netifaces as ni
+
 
 def drop_accept_encoding_on_putheader(http_connection_putheader):
     def wrapper(self, header, *values):
@@ -51,11 +50,17 @@ def proxy(interface):
 
 @app.route('/restart/<interface>', methods=['POST'])
 def restart(interface):
-    ip = ni.ifaddresses(interface)[ni.AF_INET][0]['addr']
-    print('IP: ' + ip)
-    info = Dongle(f"http://{ip}").get_data()
-    print(info)
-    return jsonify(body=info)
+    try:
+        print(f'Sending reboot request to {interface}')
+        adapter = HTTPAdapterWithSocketOptions(socket_options=[(socket.SOL_SOCKET, 25, interface.encode('utf-8'))])
+        session = requests.session()
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
+
+        response = session.post('http://192.168.100.1/ajax', data={'funcNo': '1013'})
+        return jsonify(body=response.text)
+    except Exception as e:
+        return jsonify(error=str(e)), 500
 
 
 if __name__ == '__main__':
