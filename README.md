@@ -38,3 +38,10 @@ sudo systemctl enable webproxy.service
 sudo systemctl start webproxy.service
 sudo systemctl status webproxy.service
 ```
+
+crontab-e
+```shell
+*/5 * * * * sleep 1m ; curl --location --request POST 'http://localhost:3000/restart/usb0' &
+*/5 * * * * sleep 2m ; curl --location --request POST 'http://localhost:3000/restart/usb1' &
+*/5 * * * * sleep 3m ; curl --location --request POST 'http://localhost:3000/restart/usb2' &
+```
