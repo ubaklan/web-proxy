@@ -2,7 +2,7 @@
 
 To create virtual env:
 ```
-python3 -m venv venv
+python3.9 -m venv venv
 ```
 
 To activate virtual env:
@@ -24,7 +24,7 @@ After=network.target
 [Service]
 User=ubuntu
 WorkingDirectory=/home/vladimir/web-proxy
-ExecStart=venv/bin/python3 server.py
+ExecStart=venv/bin/python3.9 server.py
 Restart=always
 
 [Install]

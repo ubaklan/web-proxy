@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import requests
 from http.client import HTTPConnection
 import socket
+from dongle_lte_api import Dongle
 
 
 def drop_accept_encoding_on_putheader(http_connection_putheader):
@@ -46,6 +47,13 @@ def proxy(interface):
         return jsonify(body=response.text)
     except Exception as e:
         return jsonify(error=str(e)), 500
+
+
+@app.route('/restart/<interface>', methods=['POST'])
+def restart(interface):
+    info = Dongle().get_data()
+    print(info)
+    return jsonify(body=info)
 
 
 if __name__ == '__main__':
