@@ -52,6 +52,7 @@ def proxy(interface):
 @app.route('/restart/<interface>', methods=['POST'])
 def restart(interface):
     ip = ni.ifaddresses(interface)[ni.AF_INET][0]['addr']
+    print('IP: ' + ip)
     info = Dongle(f"http://{ip}").get_data()
     print(info)
     return jsonify(body=info)
