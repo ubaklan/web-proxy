@@ -57,7 +57,7 @@ def restart(interface):
         session.mount("http://", adapter)
         session.mount("https://", adapter)
 
-        response = session.post('http://192.168.100.1/ajax', data={'funcNo': '1013'})
+        response = session.post('http://192.168.100.1/ajax', json={'funcNo': '1013'})
         return jsonify(body=response.text)
     except Exception as e:
         return jsonify(error=str(e)), 500
