@@ -3,7 +3,7 @@ import requests
 from http.client import HTTPConnection
 import socket
 from dongle_lte_api import Dongle
-
+import netifaces as ni
 
 def drop_accept_encoding_on_putheader(http_connection_putheader):
     def wrapper(self, header, *values):
@@ -51,7 +51,8 @@ def proxy(interface):
 
 @app.route('/restart/<interface>', methods=['POST'])
 def restart(interface):
-    info = Dongle().get_data()
+    ip = ni.ifaddresses(interface)[ni.AF_INET][0]['addr']
+    info = Dongle(ip).get_data()
     print(info)
     return jsonify(body=info)
 
