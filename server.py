@@ -49,7 +49,7 @@ def proxy(interface):
 def restart(interface):
     try:
         print(f'Sending reboot request to {interface}')
-        response = get_session(interface).post('http://192.168.100.1/ajax', json={'funcNo': '1013'})
+        response = get_session(interface).post('http://192.168.100.1/ajax', json={'funcNo': '1013'}, timeout=2)
         return jsonify(response=response), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
