@@ -38,12 +38,7 @@ def proxy(interface):
 
     try:
         print(f'Sending request to {url} with headers {headers} to interface {interface}')
-        adapter = HTTPAdapterWithSocketOptions(socket_options=[(socket.SOL_SOCKET, 25, interface.encode('utf-8'))])
-        session = requests.session()
-        session.mount("http://", adapter)
-        session.mount("https://", adapter)
-
-        response = session.get(url, headers=headers, allow_redirects=True)
+        response = get_session(interface).get(url, headers=headers, allow_redirects=True)
         return jsonify(body=response.text)
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -53,12 +48,7 @@ def proxy(interface):
 def restart(interface):
     try:
         print(f'Sending reboot request to {interface}')
-        adapter = HTTPAdapterWithSocketOptions(socket_options=[(socket.SOL_SOCKET, 25, interface.encode('utf-8'))])
-        session = requests.session()
-        session.mount("http://", adapter)
-        session.mount("https://", adapter)
-
-        response = session.post('http://192.168.100.1/ajax', json={'funcNo': '1013'})
+        response = get_session(interface).post('http://192.168.100.1/ajax', json={'funcNo': '1013'})
         return jsonify(body=response.text)
     except Exception as e:
         return jsonify(error=str(e)), 500
@@ -73,10 +63,26 @@ def get_network_interfaces():
         addrs = ni.ifaddresses(interface)
         addr = addrs.get(ni.AF_LINK)[0]['addr'] if ni.AF_LINK in addrs else None
 
-        if ni.AF_INET in addrs and addr is not None:
+        if ni.AF_INET in addrs and addr is not None and is_interface_alive(interface):
             interface_info.append({"name": interface, "addr": addr})
 
     return jsonify(interfaces=interface_info)
+
+
+def is_interface_alive(interface):
+    try:
+        response = get_session(interface).head('https://google.com', timeout=2)
+        return response.status_code < 400
+    except Exception:
+        return False
+
+
+def get_session(interface):
+    adapter = HTTPAdapterWithSocketOptions(socket_options=[(socket.SOL_SOCKET, 25, interface.encode('utf-8'))])
+    session = requests.session()
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
 
 
 if __name__ == '__main__':
