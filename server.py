@@ -76,7 +76,7 @@ def get_network_interfaces():
 
 def is_interface_alive(interface):
     try:
-        response = get_session(interface).head('https://google.com', timeout=2)
+        response = get_session(interface).head('https://google.com', timeout=1)
         return response.status_code < 400
     except Exception:
         return False
