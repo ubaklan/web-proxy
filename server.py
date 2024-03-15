@@ -51,8 +51,10 @@ def restart(interface):
         print(f'Sending reboot request to {interface}')
         response = get_session(interface).post('http://192.168.100.1/ajax', json={'funcNo': '1013'}, timeout=2)
         return jsonify(response=response), 200
+    except requests.exceptions.Timeout:
+        return jsonify(status='timeout, but expected :('), 200
     except Exception as e:
-        return jsonify(error=str(e)), 200
+        return jsonify(error=str(e)), 500
 
 
 @app.route('/interfaces', methods=['GET'])
