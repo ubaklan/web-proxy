@@ -49,14 +49,10 @@ def proxy(interface):
 def restart(interface):
     try:
         print(f'Sending reboot request to {interface}')
-        threading.Thread(target=send_restart_request)
-        return jsonify(status='async'), 200
+        response = get_session(interface).post('http://192.168.100.1/ajax', json={'funcNo': '1013'})
+        return jsonify(response=response), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
-
-
-def send_restart_request(interface):
-    get_session(interface).post('http://192.168.100.1/ajax', json={'funcNo': '1013'})
 
 
 @app.route('/interfaces', methods=['GET'])
