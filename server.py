@@ -72,7 +72,9 @@ def get_network_interfaces():
     for interface in interfaces:
         addrs = ni.ifaddresses(interface)
         addr = addrs.get(ni.AF_LINK)[0]['addr'] if ni.AF_LINK in addrs else None
-        interface_info.append({"name": interface, "addr": addr})
+
+        if ni.AF_INET in addrs and addr is not None:
+            interface_info.append({"name": interface, "addr": addr})
 
     return jsonify(interfaces=interface_info)
 
