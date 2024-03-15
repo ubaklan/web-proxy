@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import requests
 from http.client import HTTPConnection
 import socket
+import netifaces as ni
 
 
 def drop_accept_encoding_on_putheader(http_connection_putheader):
@@ -61,6 +62,12 @@ def restart(interface):
         return jsonify(body=response.text)
     except Exception as e:
         return jsonify(error=str(e)), 500
+
+
+@app.route('/interfaces', methods=['GET'])
+def get_network_interfaces():
+    interfaces = ni.interfaces()
+    return jsonify(interfaces=interfaces)
 
 
 if __name__ == '__main__':
