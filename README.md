@@ -19,13 +19,16 @@ Content:
 ```shell
 [Unit]
 Description=Web Proxy
-After=network.target
+After=network-online.target
 
 [Service]
-User=ubuntu
+User=vladimir
 WorkingDirectory=/home/vladimir/web-proxy
-ExecStart=venv/bin/python3.9 server.py
+ExecStart=/home/vladimir/web-proxy/venv/bin/python3 /home/vladimir/web-proxy/server.py
 Restart=always
+RestartSec=15s
+KillMode=process
+User=vladimir
 
 [Install]
 WantedBy=multi-user.target
