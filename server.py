@@ -39,7 +39,7 @@ def proxy(interface):
 
     try:
         print(f'Sending request to {url} with headers {headers} to interface {interface}')
-        response = get_session(interface).get(url, headers=headers, allow_redirects=True, timeout=3)
+        response = get_session(interface).get(url, headers=headers, allow_redirects=True, timeout=5)
         return jsonify(body=response.text)
     except Exception as e:
         return jsonify(error=str(e)), 500
