@@ -67,7 +67,13 @@ def restart(interface):
 @app.route('/interfaces', methods=['GET'])
 def get_network_interfaces():
     interfaces = ni.interfaces()
-    return jsonify(interfaces=interfaces)
+    interface_info = {}
+
+    for interface in interfaces:
+        addrs = ni.ifaddresses(interface)
+        interface_info[interface] = addrs.get(ni.AF_LINK)[0]['addr'] if ni.AF_LINK in addrs else None
+
+    return jsonify(interface_info)
 
 
 if __name__ == '__main__':
