@@ -1,9 +1,12 @@
-from flask import Flask, request, jsonify
-import requests
-from http.client import HTTPConnection
 import socket
+from http.client import HTTPConnection
+
 import netifaces as ni
-import threading
+import requests
+from flask import Flask, request, jsonify
+
+BOT_TOKEN = '6845733065:AAGcMqd32JbqY990ngapyDsnov7MTL0CM-0'
+DEFAULT_INTERFACE = 'wlan0'
 
 
 def drop_accept_encoding_on_putheader(http_connection_putheader):
@@ -70,6 +73,20 @@ def get_network_interfaces():
             interface_info.append({"name": interface, "addr": addr})
 
     return jsonify(interfaces=interface_info)
+
+
+@app.route('/update-gateway-ip', methods=['POST'])
+def share_telegram_ip():
+    public_ip = get_session(DEFAULT_INTERFACE).get('https://ifconfig.io/ip').text
+    send_tg_message(public_ip)
+    return '', 200
+
+
+def send_tg_message(message):
+    updates = get_session(DEFAULT_INTERFACE).get(f'https://api.telegram.org/bot{BOT_TOKEN}/getUpdates')
+    for result in updates.json()['result']:
+        get_session(DEFAULT_INTERFACE).post(f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage',
+                                            json={'chat_id': result['message']['chat']['id'], 'text': message})
 
 
 def is_interface_alive(interface):
