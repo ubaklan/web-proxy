@@ -83,9 +83,9 @@ def share_telegram_ip():
 
 
 def send_tg_message(message):
-    updates = get_session(DEFAULT_INTERFACE).get(f'https://api.telegram.org/bot{BOT_TOKEN}/getUpdates')
+    updates = requests.get(f'https://api.telegram.org/bot{BOT_TOKEN}/getUpdates')
     for result in updates.json()['result']:
-        get_session(DEFAULT_INTERFACE).post(f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage',
+        requests.post(f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage',
                                             json={'chat_id': result['message']['chat']['id'], 'text': message})
 
 
