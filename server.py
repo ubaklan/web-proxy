@@ -5,7 +5,7 @@ import netifaces as ni
 import requests
 from flask import Flask, request, jsonify
 
-BOT_TOKEN = '6845733065:AAGcMqd32JbqY990ngapyDsnov7MTL0CM-0'
+BOT_TOKEN = '6768981638:AAHc1nx1V0RuCwy3R-90kYmLkvJP8bSLMHo'
 DEFAULT_INTERFACE = 'wlan0'
 
 
