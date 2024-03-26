@@ -107,4 +107,5 @@ def get_session(interface):
 
 if __name__ == '__main__':
     send_tg_message('Im alive!')
+    share_telegram_ip()
     app.run(debug=True, host='0.0.0.0', port=3000)
