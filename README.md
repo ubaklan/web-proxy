@@ -48,3 +48,4 @@ crontab-e
 */5 * * * * sleep 2m ; curl --location --request POST 'http://localhost:3000/restart/usb1' &
 */5 * * * * sleep 3m ; curl --location --request POST 'http://localhost:3000/restart/usb2' &
 ```
+
