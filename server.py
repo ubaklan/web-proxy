@@ -39,7 +39,11 @@ app = Flask(__name__)
 def proxy(interface):
     url = request.json.get('url')
     headers = request.json.get('headers', {})
-
+    requestCookie = headers.get('Cookie')
+    print(f'Cookie from request header : {requestCookie}')
+    headers.update('Cookie', '_pxhd=8316138300f521a89644af7ebf2c0785cc03b8f39c07d3b9908e9a4811fd9b27:45f353e4-120a-11ef-81d6-b2388b8b4315; pxcts=4860a7d4-120a-11ef-93c3-62238e9ac04b; _pxvid=45f353e4-120a-11ef-81d6-b2388b8b4315; salsify_session_id=3f01a419-8b50-4217-873b-258a4a20a16d; TS01a90220=012aaf475070a32d2d9057db193b3260381d7adf783786185fce39bb2b3b9b71452a158a3fb323e98c1d8fc9f3610a9ff6a1317ece;')
+    updatedRequestCookie = headers.get('Cookie')
+    print(f'Updated cookie from request header : {updatedRequestCookie}')
     try:
         print(f'Sending request to {url} with headers {headers} to interface {interface}')
         response = get_session(interface).get(url, headers=headers, allow_redirects=True, timeout=10)
