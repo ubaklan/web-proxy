@@ -108,7 +108,7 @@ def get_session(interface):
 def share_api_ip():
     try:
         public_ip = get_session(DEFAULT_INTERFACE).get('https://ifconfig.io/ip').text
-        response = requests.post(f'http://core-data-api.default.svc.cluster.local/proxy/ip', json={'ip': public_ip}, headers={ 'X-API-KEY' : '7a9c5b44-3d67-4ae1-8189-2c3d8177ccf7' })
+        response = requests.post(f'https://core-data-api.threecolts.com/proxy/ip', json={'ip': public_ip}, headers={ 'X-API-KEY' : '7a9c5b44-3d67-4ae1-8189-2c3d8177ccf7' })
         print(f'update proxy ip response : {response}')
     except:
       print("Proxy id update request failed")
