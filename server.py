@@ -3,7 +3,7 @@ from http.client import HTTPConnection
 
 import netifaces as ni
 import requests
-import sched, time
+import schedule, time
 from flask import Flask, request, jsonify
 
 BOT_TOKEN = '7033354884:AAEAmm4-ecOhwuVKTm6Q5d8qZsy_Px9DPZc'
@@ -105,16 +105,18 @@ def get_session(interface):
     session.mount("https://", adapter)
     return session
 
-def share_api_ip(scheduler):
-    scheduler.enter(60 * 30, 1, share_api_ip, (scheduler,))
-    public_ip = get_session(DEFAULT_INTERFACE).get('https://ifconfig.io/ip').text
-    response = requests.post(f'http://core-data-api.default.svc.cluster.local/proxy/ip', json={'ip': public_ip}, headers={ 'X-API-KEY' : '7a9c5b44-3d67-4ae1-8189-2c3d8177ccf7' })
-    print(f'update proxy ip response : {response}')
+def share_api_ip():
+    try:
+        public_ip = get_session(DEFAULT_INTERFACE).get('https://ifconfig.io/ip').text
+        response = requests.post(f'http://core-data-api.default.svc.cluster.local/proxy/ip', json={'ip': public_ip}, headers={ 'X-API-KEY' : '7a9c5b44-3d67-4ae1-8189-2c3d8177ccf7' })
+        print(f'update proxy ip response : {response}')
+    except:
+      print("Proxy id update request failed")
 
 def schedule_proxy_ip_update():
-    proxyIpSheduler = sched.scheduler(time.time, time.sleep)
-    proxyIpSheduler.enter(60 * 30, 1, share_api_ip, (proxyIpSheduler,))
-    proxyIpSheduler.run()
+    schedule.every(30).minutes.do(share_api_ip)
+    while 1:
+       schedule.run_pending()
 
 if __name__ == '__main__':
     send_tg_message('Im alive!')
