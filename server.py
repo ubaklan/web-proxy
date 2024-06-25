@@ -3,7 +3,7 @@ from http.client import HTTPConnection
 
 import netifaces as ni
 import requests
-import schedule, time
+import sched, time
 from flask import Flask, request, jsonify
 
 BOT_TOKEN = '7033354884:AAEAmm4-ecOhwuVKTm6Q5d8qZsy_Px9DPZc'
@@ -107,17 +107,17 @@ def get_session(interface):
 
 def share_api_ip():
     try:
+        scheduler.enter(60 * 30, 1, share_api_ip, (scheduler,))
         public_ip = get_session(DEFAULT_INTERFACE).get('https://ifconfig.io/ip').text
         response = requests.post(f'https://core-data-api.threecolts.com/proxy/ip', json={'ip': public_ip}, headers={ 'X-API-KEY' : '7a9c5b44-3d67-4ae1-8189-2c3d8177ccf7' })
         print(f'update proxy ip response : {response}')
     except:
-      print("Proxy id update request failed")
+      print('Proxy id update request failed')
 
 def schedule_proxy_ip_update():
-    schedule.every(30).minutes.do(share_api_ip)
-    share_api_ip()
-    while 1:
-       schedule.run_pending()
+    proxyIpSheduler = sched.scheduler(time.time, time.sleep)
+    proxyIpSheduler.enter(60 * 30, 1, share_api_ip, (proxyIpSheduler,))
+    proxyIpSheduler.run()
 
 if __name__ == '__main__':
     send_tg_message('Im alive!')
