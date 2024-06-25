@@ -115,6 +115,7 @@ def share_api_ip():
 
 def schedule_proxy_ip_update():
     schedule.every(30).minutes.do(share_api_ip)
+    share_api_ip()
     while 1:
        schedule.run_pending()
 
