@@ -105,7 +105,7 @@ def get_session(interface):
     session.mount("https://", adapter)
     return session
 
-def share_api_ip():
+def share_api_ip(scheduler):
     try:
         scheduler.enter(60 * 30, 1, share_api_ip, (scheduler,))
         public_ip = get_session(DEFAULT_INTERFACE).get('https://ifconfig.io/ip').text
@@ -115,9 +115,9 @@ def share_api_ip():
       print('Proxy id update request failed')
 
 def schedule_proxy_ip_update():
-    proxyIpSheduler = sched.scheduler(time.time, time.sleep)
-    proxyIpSheduler.enter(60 * 30, 1, share_api_ip, (proxyIpSheduler,))
-    proxyIpSheduler.run()
+    proxyIpSсheduler = sched.scheduler(time.time, time.sleep)
+    proxyIpSсheduler.enter(60 * 30, 1, share_api_ip, (proxyIpSсheduler,))
+    proxyIpSсheduler.run()
 
 if __name__ == '__main__':
     send_tg_message('Im alive!')
