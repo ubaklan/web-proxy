@@ -4,6 +4,7 @@ from http.client import HTTPConnection
 import netifaces as ni
 import requests
 import sched, time
+import threading
 from flask import Flask, request, jsonify
 
 BOT_TOKEN = '7033354884:AAEAmm4-ecOhwuVKTm6Q5d8qZsy_Px9DPZc'
@@ -119,7 +120,11 @@ def schedule_proxy_ip_update():
     proxyIpSсheduler.enter(60 * 30, 1, share_api_ip, (proxyIpSсheduler,))
     proxyIpSсheduler.run()
 
+def start_update_ip():
+    th = threading.Thread(target=schedule_proxy_ip_update, name="ipUploader")
+    th.start()
+
 if __name__ == '__main__':
+    start_update_ip()
     app.run(debug=True, host='0.0.0.0', port=3000)
-#     schedule_proxy_ip_update()
 
