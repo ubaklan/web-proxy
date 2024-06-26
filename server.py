@@ -122,5 +122,6 @@ def schedule_proxy_ip_update():
 if __name__ == '__main__':
     send_tg_message('Im alive!')
     share_telegram_ip()
-    schedule_proxy_ip_update()
     app.run(debug=True, host='0.0.0.0', port=3000)
+    schedule_proxy_ip_update()
+
