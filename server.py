@@ -3,8 +3,6 @@ from http.client import HTTPConnection
 
 import netifaces as ni
 import requests
-import sched, time
-import threading
 from flask import Flask, request, jsonify
 
 BOT_TOKEN = '7033354884:AAEAmm4-ecOhwuVKTm6Q5d8qZsy_Px9DPZc'
@@ -80,16 +78,10 @@ def get_network_interfaces():
 @app.route('/update-gateway-ip', methods=['POST'])
 def share_telegram_ip():
     public_ip = get_session(DEFAULT_INTERFACE).get('https://ifconfig.io/ip').text
-    send_tg_message(public_ip)
+    response = requests.post(f'https://core-data-api.threecolts.com/proxy/ip', json={'ip': public_ip}, headers={ 'X-API-KEY' : '7a9c5b44-3d67-4ae1-8189-2c3d8177ccf7' })
+    print(f'update proxy ip response : {response}')
+
     return '', 200
-
-
-def send_tg_message(message):
-    updates = requests.get(f'https://api.telegram.org/bot{BOT_TOKEN}/getUpdates')
-    for result in updates.json()['result']:
-        requests.post(f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage',
-                                            json={'chat_id': result['message']['chat']['id'], 'text': message})
-
 
 def is_interface_alive(interface):
     try:
@@ -106,25 +98,6 @@ def get_session(interface):
     session.mount("https://", adapter)
     return session
 
-def share_api_ip(scheduler):
-    try:
-        scheduler.enter(60 * 30, 1, share_api_ip, (scheduler,))
-        public_ip = get_session(DEFAULT_INTERFACE).get('https://ifconfig.io/ip').text
-        response = requests.post(f'https://core-data-api.threecolts.com/proxy/ip', json={'ip': public_ip}, headers={ 'X-API-KEY' : '7a9c5b44-3d67-4ae1-8189-2c3d8177ccf7' })
-        print(f'update proxy ip response : {response}')
-    except:
-      print('Proxy id update request failed')
-
-def schedule_proxy_ip_update():
-    proxyIpSсheduler = sched.scheduler(time.time, time.sleep)
-    proxyIpSсheduler.enter(60 * 30, 1, share_api_ip, (proxyIpSсheduler,))
-    proxyIpSсheduler.run()
-
-def start_update_ip():
-    th = threading.Thread(target=schedule_proxy_ip_update, name="ipUploader")
-    th.start()
-
 if __name__ == '__main__':
-    start_update_ip()
     app.run(debug=True, host='0.0.0.0', port=3000)
 
