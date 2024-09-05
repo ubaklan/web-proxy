@@ -10,7 +10,7 @@ To activate virtual env:
 source venv/bin/activate
 ```
 
-Ubuntu setup:
+# Webproxy service setup:
 ```shell
 sudo nano /etc/systemd/system/webproxy.service
 ```
@@ -40,6 +40,36 @@ sudo systemctl daemon-reload
 sudo systemctl enable webproxy.service
 sudo systemctl start webproxy.service
 sudo systemctl status webproxy.service
+```
+
+# Reverse tunnel setup:
+```shell
+sudo nano /etc/systemd/system/reverse-ssh-tunnel.service
+```
+
+Content:
+```shell
+[Unit]
+Description=Reverse SSH Tunnel to VPS
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/ssh -N -R 0.0.0.0:3000:localhost:3000 ubuntu@ec2-54-84-105-236.compute-1.amazonaws.com -i /home/vladimir/web-proxy/uladzimir-check-ssh-dir.pem
+Restart=always
+User=vladimir
+RestartSec=30s
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Start and test:
+```shell
+sudo systemctl daemon-reload
+sudo systemctl enable reverse-ssh-tunnel
+sudo systemctl start reverse-ssh-tunnel
+sudo systemctl status reverse-ssh-tunnel
 ```
 
 crontab-e
