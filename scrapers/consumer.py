@@ -122,6 +122,7 @@ def is_interface_alive(interface):
 
 def get_network_interfaces():
     interfaces = ni.interfaces()
+    print(interfaces)
     interface_info = []
     for interface in interfaces:
         addrs = ni.ifaddresses(interface)
