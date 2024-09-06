@@ -110,7 +110,10 @@ def get_category_page_content(iface, category_url, user_agent):
                   'application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,'
                   'application/signed-exchange;v=b3;q=0.7'
     }
-    return get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=120)
+    print('Making a request to category: ' + category_url)
+    result = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=60)
+    print('Got response from walmart')
+    return result
 
 
 def parse(raw_content):
