@@ -110,6 +110,13 @@ def process_categories(iface, iface_categories, user_agents):
 
 def scrape_category(iface, category_url, user_agent):
     print('Scraping ' + category_url + ',' + iface['name'] + ',' + user_agent)
+    response = get_category_page_content(iface, category_url, user_agent)
+    parsed = parse(response.text)
+    save_category(parsed.raw_json)
+
+
+@timing_decorator
+def get_category_page_content(iface, category_url, user_agent):
     headers = {
         'User-Agent': user_agent,
         'Content-Type': 'text/plain;text/html',
@@ -118,9 +125,7 @@ def scrape_category(iface, category_url, user_agent):
                   'application/signed-exchange;v=b3;q=0.7'
     }
 
-    response = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=120)
-    parsed = parse(response.text)
-    save_category(parsed.raw_json)
+    return get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=120)
 
 
 @timing_decorator
