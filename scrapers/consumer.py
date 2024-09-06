@@ -175,72 +175,77 @@ def restart(interface):
 
 
 def process_top_level_categories(categories, user_agents):
-    interfaces = get_network_interfaces()
-    interfaces_len = len(interfaces)
-    print('INTERFACES: ' + str(interfaces_len))
-    print('Categories len: ' + str(len(categories)))
-    partitioned_categories = split_list(categories, interfaces_len)
-    print('Partitioned categories len: ' + str(len(categories)))
-    all_raw_contents = []
+    try:
+        interfaces = get_network_interfaces()
+        interfaces_len = len(interfaces)
+        print('INTERFACES: ' + str(interfaces_len))
+        print('Categories len: ' + str(len(categories)))
+        partitioned_categories = split_list(categories, interfaces_len)
+        print('Partitioned categories len: ' + str(len(categories)))
+        all_raw_contents = []
 
-    categories_threads = []
+        categories_threads = []
 
-    def thread_target(_iface, iface_categories):
-        response = process_categories(_iface, iface_categories, user_agents)
-        all_raw_contents.extend(response)
+        def thread_target(_iface, iface_categories):
+            response = process_categories(_iface, iface_categories, user_agents)
+            all_raw_contents.extend(response)
 
-    # Process categories
-    for i in range(interfaces_len):
-        interface = interfaces[i]
-        categories_for_interface = partitioned_categories[i]
-        print('Categories for interface: ' + str(len(categories_for_interface)))
-        thread = threading.Thread(
-            target=thread_target,
-            args=(interface, categories_for_interface)
-        )
-        categories_threads.append(thread)
-        thread.start()
+        # Process categories
+        for i in range(interfaces_len):
+            interface = interfaces[i]
+            categories_for_interface = partitioned_categories[i]
+            print('Categories for interface: ' + str(len(categories_for_interface)))
+            thread = threading.Thread(
+                target=thread_target,
+                args=(interface, categories_for_interface)
+            )
+            categories_threads.append(thread)
+            thread.start()
 
-    for thread in categories_threads:
-        thread.join()
+        for thread in categories_threads:
+            thread.join()
 
-    # Restart interfaces
-    for iface in interfaces:
-        restart(iface['name'])
+        # Restart interfaces
+        for iface in interfaces:
+            restart(iface['name'])
 
-    # Record start time for waiting
-    start_time = time.time()
+        # Record start time for waiting
+        start_time = time.time()
 
-    save_data_api_threads = []
+        save_data_api_threads = []
 
-    # Parse and send results to API
-    for raw_content in all_raw_contents:
-        thread = threading.Thread(
-            target=save_category,
-            args=(raw_content,)
-        )
+        # Parse and send results to API
+        for raw_content in all_raw_contents:
+            thread = threading.Thread(
+                target=save_category,
+                args=(raw_content,)
+            )
 
-        save_data_api_threads.append(thread)
+            save_data_api_threads.append(thread)
 
-    for thread in save_data_api_threads:
-        thread.start()
+        for thread in save_data_api_threads:
+            thread.start()
 
-    for thread in save_data_api_threads:
-        thread.join()
+        for thread in save_data_api_threads:
+            thread.join()
 
-    # Calculate remaining time to wait after processing
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    waiting_time = max(120 - elapsed_time, 0)  # Ensure non-negative waiting time
+        # Calculate remaining time to wait after processing
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        waiting_time = max(120 - elapsed_time, 0)  # Ensure non-negative waiting time
 
-    print(f"Going to wait for {waiting_time} sec.")
-    time.sleep(waiting_time)
-    print("All threads have completed.")
+        print(f"Going to wait for {waiting_time} sec.")
+        time.sleep(waiting_time)
+        print("All threads have completed.")
+    except Exception as e:
+        print('Exception received: ' + str(e))
+        time.sleep(60)
 
 
 if __name__ == '__main__':
     top_level_all_categories = read_file_to_array('resources/categories.csv')
     top_level_user_agents = read_file_to_array('resources/user_agents.csv')
 
-    for top_level_categories in split_into_chunks(top_level_all_categories, 150):
-        process_top_level_categories(top_level_categories, top_level_user_agents)
+    while True:
+        for top_level_categories in split_into_chunks(top_level_all_categories, 150):
+            process_top_level_categories(top_level_categories, top_level_user_agents)
