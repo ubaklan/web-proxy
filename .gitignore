@@ -27,3 +27,6 @@ __pycache__/
 
 # Python virtual environment
 venv/
+
+scrapers/venv/
+scrapers/.env

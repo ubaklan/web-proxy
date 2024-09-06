@@ -67,6 +67,24 @@ def process_categories(iface, iface_categories):
     print(iface)
     print(iface_categories)
 
+    threads = []
+
+    for category in iface_categories:
+        thread = threading.Thread(
+            target=scrape_category,
+            args=(interface, category)
+        )
+        threads.append(thread)
+
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+
+def scrape_category(iface, category_url):
+    print('Scraping ' + category_url + ',' + iface)
 
 if __name__ == '__main__':
     all_categories = read_file_to_array('resources/categories.csv')
@@ -86,7 +104,7 @@ if __name__ == '__main__':
         thread = threading.Thread(
             target=process_categories,
             args=(interface, categories_for_interface),
-            name=f"Thread-{i+1}"
+            name=f"Thread-{i + 1}"
         )
         thread.start()
         threads.append(thread)
