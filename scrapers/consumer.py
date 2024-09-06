@@ -82,7 +82,11 @@ if __name__ == '__main__':
     for i in range(interfaces_len):
         interface = interfaces[i]
         categories_for_interface = partitioned_categories[i]
-        thread = threading.Thread(process_categories(interface, categories_for_interface))
+        thread = threading.Thread(
+            target=process_categories,
+            args=(interface, categories_for_interface),
+            name=f"Thread-{i+1}"  # Optional: Naming threads for clarity
+        )
         thread.start()
         threads.append(thread)
 
