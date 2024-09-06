@@ -60,6 +60,10 @@ def split_list(lst, n):
 
 
 def process_categories(iface, iface_categories):
+    thread_name = threading.current_thread().name
+    thread_id = threading.get_native_id()
+
+    print(f"Thread Name: {thread_name}, Thread ID: {thread_id}")
     print(iface)
     print(iface_categories)
 
