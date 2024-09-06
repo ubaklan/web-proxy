@@ -10,6 +10,16 @@ import json
 import time
 import asyncio
 
+def timing_decorator(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"Execution time for {func.__name__}: {execution_time:.4f} seconds")
+        return result
+    return wrapper
+
 
 class CategoryPageParseResult:
     def __init__(self, raw_json, max_page, current_page):
@@ -110,7 +120,7 @@ def scrape_category(iface, category_url, user_agent):
     parsed = parse(response.text)
     save_category(parsed.raw_json)
 
-
+@timing_decorator
 def parse(raw_content):
     try:
         soup = BeautifulSoup(raw_content, 'html.parser')
@@ -132,6 +142,7 @@ def parse(raw_content):
         return None
 
 
+@timing_decorator
 def save_category(payload):
     headers = {
         'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
