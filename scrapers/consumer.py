@@ -12,13 +12,6 @@ import aiohttp
 import asyncio
 
 
-class CategoryPageParseResult:
-    def __init__(self, raw_json, max_page, current_page):
-        self.raw_json = raw_json
-        self.max_page = max_page
-        self.current_page = current_page
-
-
 class HTTPAdapterWithSocketOptions(requests.adapters.HTTPAdapter):
     def __init__(self, *args, **kwargs):
         self.socket_options = kwargs.pop("socket_options", None)
@@ -119,14 +112,7 @@ def parse(raw_content):
 
         pagination_v2 = raw_json['props']['pageProps']['initialData']['searchResult']['paginationV2']
 
-        max_page = pagination_v2['maxPage']
-        current_page = pagination_v2['pageProperties']['page']
-
-        return CategoryPageParseResult(
-            raw_json=json.dumps(raw_json),
-            max_page=max_page,
-            current_page=current_page
-        )
+        return json.dumps(raw_json)
     except Exception as e:
         print(f"Exception caught: {e}")
         return None
