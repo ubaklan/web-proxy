@@ -75,7 +75,7 @@ if __name__ == '__main__':
     interfaces = get_network_interfaces()
     interfaces_len = len(interfaces)
 
-    print('INTERFACES: ' + interfaces_len)
+    print('INTERFACES: ' + str(interfaces_len))
     partitioned_categories = split_list(categories, interfaces_len)
 
     threads = []
