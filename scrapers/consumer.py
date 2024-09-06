@@ -124,6 +124,7 @@ def parse(raw_content):
         max_page = pagination_v2['maxPage']
         current_page = pagination_v2['pageProperties']['page']
 
+        print(raw_json)
         # Create and return a CategoryPageParseResult object
         return CategoryPageParseResult(
             raw_json=json.dumps(raw_json),
