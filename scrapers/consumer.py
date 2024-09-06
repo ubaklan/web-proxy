@@ -94,7 +94,7 @@ def scrape_category(iface, category_url, user_agent):
                   'application/signed-exchange;v=b3;q=0.7'
     }
 
-    response = get_session(iface).get(category_url, headers=headers, allow_redirects=True, timeout=10)
+    response = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=10)
     print(response)
 
 if __name__ == '__main__':
