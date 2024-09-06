@@ -1,7 +1,7 @@
-import aiohttp
-import asyncio
-import netifaces as ni
 import socket
+import netifaces as ni
+import requests
+import threading
 import random
 from bs4 import BeautifulSoup
 import json
@@ -9,9 +9,9 @@ import time
 
 
 def timing_decorator(func):
-    async def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         start_time = time.time()
-        result = await func(*args, **kwargs)
+        result = func(*args, **kwargs)
         end_time = time.time()
         execution_time = end_time - start_time
         print(f"Execution time for {func.__name__}: {execution_time:.4f} seconds")
@@ -27,81 +27,15 @@ class CategoryPageParseResult:
         self.current_page = current_page
 
 
-async def get_session(interface):
-    # aiohttp doesn’t use socket_options, so this is a simplified version
-    session = aiohttp.ClientSession()
-    return session
+class HTTPAdapterWithSocketOptions(requests.adapters.HTTPAdapter):
+    def __init__(self, *args, **kwargs):
+        self.socket_options = kwargs.pop("socket_options", None)
+        super(HTTPAdapterWithSocketOptions, self).__init__(*args, **kwargs)
 
-
-async def get_category_page_content(session, category_url, user_agent):
-    headers = {
-        'User-Agent': user_agent,
-        'Content-Type': 'text/plain;text/html',
-        'Accept': 'text/html,application/xhtml+xml,'
-                  'application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,'
-                  'application/signed-exchange;v=b3;q=0.7'
-    }
-    async with session.get(category_url, headers=headers, allow_redirects=True, timeout=120) as response:
-        return await response.text()
-
-
-async def parse(raw_content):
-    try:
-        soup = BeautifulSoup(raw_content, 'html.parser')
-        data = soup.find(id="__NEXT_DATA__").string
-        raw_json = json.loads(data)
-        pagination_v2 = raw_json['props']['pageProps']['initialData']['searchResult']['paginationV2']
-        max_page = pagination_v2['maxPage']
-        current_page = pagination_v2['pageProperties']['page']
-        return CategoryPageParseResult(
-            raw_json=json.dumps(raw_json),
-            max_page=max_page,
-            current_page=current_page
-        )
-    except Exception as e:
-        print(f"Exception caught: {e}")
-        return None
-
-
-async def save_category(payload):
-    headers = {
-        'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
-        'Content-Type': 'application/json'
-    }
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.post('https://core-data-api.threecolts.com/raw-walmart/categories', headers=headers,
-                                    json=payload, timeout=360) as response:
-                response.raise_for_status()
-                print('Sent categories to API: ' + str(response.status))
-        except aiohttp.ClientResponseError as http_err:
-            print(f"HTTP error occurred: {http_err}")
-        except Exception as err:
-            print(f"Other error occurred: {err}")
-
-
-async def restart(interface):
-    try:
-        print(f'Sending reboot request to {interface}')
-        async with aiohttp.ClientSession() as session:
-            async with session.post('http://192.168.100.1/ajax', json={'funcNo': '1013'}, timeout=2) as response:
-                await response.text()  # Make sure the request is completed
-    except aiohttp.ClientTimeout:
-        print('timeout, but expected :(')
-    except Exception as e:
-        print(str(e))
-
-
-async def process_categories(session, iface, iface_categories, user_agents):
-    tasks = []
-
-    for category in iface_categories:
-        user_agent = random.choice(user_agents)
-        task = get_category_page_content(session, category, user_agent)
-        tasks.append(task)
-
-    raw_contents = await asyncio.gather(*tasks)
-    return raw_contents
+    def init_poolmanager(self, *args, **kwargs):
+        if self.socket_options is not None:
+            kwargs["socket_options"] = self.socket_options
+        super(HTTPAdapterWithSocketOptions, self).init_poolmanager(*args, **kwargs)
 
 
 def read_file_to_array(filename):
@@ -122,15 +56,21 @@ def is_interface_alive(interface):
 
 def get_network_interfaces():
     interfaces = ni.interfaces()
-    print(interfaces)
     interface_info = []
     for interface in interfaces:
         addrs = ni.ifaddresses(interface)
-        print(addrs)
         addr = addrs.get(ni.AF_LINK)[0]['addr'] if ni.AF_LINK in addrs else None
         if ni.AF_INET in addrs and addr is not None and interface != 'wlan0' and is_interface_alive(interface):
             interface_info.append({"name": interface, "addr": addr})
     return interface_info
+
+
+def get_session(interface):
+    adapter = HTTPAdapterWithSocketOptions(socket_options=[(socket.SOL_SOCKET, 25, interface.encode('utf-8'))])
+    session = requests.session()
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
 
 
 def split_list(lst, n):
@@ -138,38 +78,143 @@ def split_list(lst, n):
     return [lst[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n)]
 
 
-async def process_top_level_categories(categories, user_agents):
+def process_categories(iface, iface_categories, user_agents):
+    threads = []
+    raw_contents = []
+
+    def thread_target(category, user_agent):
+        response = get_category_page_content(iface, category, user_agent)
+        raw_contents.append(response.text)
+
+    for category in iface_categories:
+        thread = threading.Thread(
+            target=thread_target,
+            args=(category, random.choice(user_agents))
+        )
+        threads.append(thread)
+
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    return raw_contents
+
+
+def get_category_page_content(iface, category_url, user_agent):
+    headers = {
+        'User-Agent': user_agent,
+        'Content-Type': 'text/plain;text/html',
+        'Accept': 'text/html,application/xhtml+xml,'
+                  'application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,'
+                  'application/signed-exchange;v=b3;q=0.7'
+    }
+    print('Making a request to category: ' + category_url)
+    result = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=60)
+    print('Got response from walmart')
+    return result
+
+
+def parse(raw_content):
+    try:
+        soup = BeautifulSoup(raw_content, 'html.parser')
+        data = soup.find(id="__NEXT_DATA__").string
+        raw_json = json.loads(data)
+        pagination_v2 = raw_json['props']['pageProps']['initialData']['searchResult']['paginationV2']
+        max_page = pagination_v2['maxPage']
+        current_page = pagination_v2['pageProperties']['page']
+        return CategoryPageParseResult(
+            raw_json=json.dumps(raw_json),
+            max_page=max_page,
+            current_page=current_page
+        )
+    except Exception as e:
+        print(f"Exception caught: {e}")
+        return None
+
+
+def save_category(payload):
+    headers = {
+        'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
+        'Content-Type': 'application/json'
+    }
+    try:
+        response = requests.post('https://core-data-api.threecolts.com/raw-walmart/categories', headers=headers,
+                                 data=payload, timeout=360)
+        response.raise_for_status()
+        print('Sent categories to API: ' + str(response.status_code))
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except Exception as err:
+        print(f"Other error occurred: {err}")
+    return None
+
+
+def restart(interface):
+    try:
+        print(f'Sending reboot request to {interface}')
+        response = get_session(interface).post('http://192.168.100.1/ajax', json={'funcNo': '1013'}, timeout=2)
+    except requests.exceptions.Timeout:
+        print('timeout, but expected :(')
+    except Exception as e:
+        print(str(e))
+
+
+def process_top_level_categories(categories, user_agents):
     interfaces = get_network_interfaces()
     interfaces_len = len(interfaces)
     print('INTERFACES: ' + str(interfaces_len))
     partitioned_categories = split_list(categories, interfaces_len)
     all_raw_contents = []
 
-    async with aiohttp.ClientSession() as session:
-        # Process categories asynchronously
-        tasks = [
-            process_categories(session, iface, categories_for_interface, user_agents)
-            for iface, categories_for_interface in zip(interfaces, partitioned_categories)
-        ]
-        results = await asyncio.gather(*tasks)
+    categories_threads = []
 
-        for raw_contents in results:
-            all_raw_contents.extend(raw_contents)
+    def thread_target(iface, iface_categories, user_agents):
+        response = process_categories(iface, iface_categories, user_agents)
+        all_raw_contents.extend(response)
 
-        # Restart interfaces
-        restart_tasks = [restart(iface['name']) for iface in interfaces]
-        await asyncio.gather(*restart_tasks)
+    # Process categories
+    for i in range(interfaces_len):
+        interface = interfaces[i]
+        categories_for_interface = partitioned_categories[i]
+        thread = threading.Thread(
+            target=thread_target,
+            args=(interface, categories_for_interface, user_agents)
+        )
+        categories_threads.append(thread)
+
+    for thread in categories_threads:
+        thread.start()
+
+    for thread in categories_threads:
+        thread.join()
+
+    # Restart interfaces
+    for iface in interfaces:
+        restart(iface['name'])
 
     # Record start time for waiting
     start_time = time.time()
 
-    # Parse and send results to API
-    parse_tasks = [parse(raw_content) for raw_content in all_raw_contents]
-    parsed_results = await asyncio.gather(*parse_tasks)
+    save_data_api_threads = []
 
-    # Filter out None results and send them to the API
-    save_tasks = [save_category(result.raw_json) for result in parsed_results if result]
-    await asyncio.gather(*save_tasks)
+    # Parse and send results to API
+    for raw_content in all_raw_contents:
+        result = parse(raw_content)
+        if result:
+            thread = threading.Thread(
+                target=save_category,
+                args=(result.raw_json,)
+            )
+
+            save_data_api_threads.append(thread)
+
+    for thread in save_data_api_threads:
+        thread.start()
+
+    for thread in save_data_api_threads:
+        thread.join()
 
     # Calculate remaining time to wait after processing
     end_time = time.time()
@@ -177,7 +222,7 @@ async def process_top_level_categories(categories, user_agents):
     waiting_time = max(120 - elapsed_time, 0)  # Ensure non-negative waiting time
 
     print(f"Going to wait for {waiting_time} sec.")
-    await asyncio.sleep(waiting_time)
+    time.sleep(waiting_time)
     print("All threads have completed.")
 
 
@@ -185,10 +230,5 @@ if __name__ == '__main__':
     top_level_all_categories = read_file_to_array('resources/categories.csv')
     top_level_user_agents = read_file_to_array('resources/user_agents.csv')
 
-
-    async def main():
-        for top_level_categories in split_list(top_level_all_categories, 200):
-            await process_top_level_categories(top_level_categories, top_level_user_agents)
-
-
-    asyncio.run(main())
+    for top_level_categories in split_list(top_level_all_categories, 300):
+        process_top_level_categories(top_level_categories, top_level_user_agents)
