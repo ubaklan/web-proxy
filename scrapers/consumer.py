@@ -108,7 +108,7 @@ def scrape_category(iface, category_url, user_agent):
     }
 
     response = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=120)
-    asyncio.create_task(save_category(response.text))
+    asyncio.run(save_category(response.text))
 
 
 def parse(raw_content):
