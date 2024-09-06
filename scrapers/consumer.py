@@ -2,6 +2,7 @@ import socket
 
 import netifaces as ni
 import requests
+import threading
 
 
 class HTTPAdapterWithSocketOptions(requests.adapters.HTTPAdapter):
@@ -72,7 +73,15 @@ if __name__ == '__main__':
 
     partitioned_categories = split_list(categories, interfaces_len)
 
+    threads = []
+
     for i in range(interfaces_len):
         interface = interfaces[i]
         categories_for_interface = partitioned_categories[i]
-        process_categories(interface, categories_for_interface)
+        thread = threading.Thread(process_categories(interface, categories_for_interface))
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join()
+    print("All threads have completed.")
