@@ -74,7 +74,9 @@ def get_session(interface):
 
 
 def split_list(lst, n):
-    return [lst[i:i + n] for i in range(0, len(lst), n)]
+    k, m = divmod(len(lst), n)
+    return (lst[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
+
 
 
 def process_categories(iface, iface_categories, user_agents):
@@ -172,7 +174,7 @@ def process_top_level_categories(categories, user_agents):
     categories_threads = []
 
     def thread_target(_iface, iface_categories):
-        response = process_categories(iface, iface_categories, user_agents)
+        response = process_categories(_iface, iface_categories, user_agents)
         all_raw_contents.extend(response)
 
     # Process categories
