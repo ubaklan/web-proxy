@@ -94,8 +94,8 @@ def process_categories(iface, iface_categories, user_agents):
     threads = []
     raw_contents = []
 
-    def thread_target(category, user_agent):
-        response = get_category_page_content(iface, category, user_agent)
+    def thread_target(_category, user_agent):
+        response = get_category_page_content(iface, _category, user_agent)
         raw_contents.append(response.text)
 
     for category in iface_categories:
@@ -198,8 +198,6 @@ def process_top_level_categories(categories, user_agents):
             args=(interface, categories_for_interface)
         )
         categories_threads.append(thread)
-
-    for thread in categories_threads:
         thread.start()
 
     for thread in categories_threads:
