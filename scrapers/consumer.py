@@ -72,7 +72,7 @@ def process_categories(iface, iface_categories):
     for category in iface_categories:
         thread = threading.Thread(
             target=scrape_category,
-            args=(interface, category)
+            args=(iface, category)
         )
         threads.append(thread)
 
