@@ -138,7 +138,7 @@ def save_category(payload):
 
     try:
         response = requests.post('https://core-data-api.threecolts.com/raw-walmart/categories', headers=headers,
-                                 json=str(payload))
+                                 data=payload)
         response.raise_for_status()
         print('Sent categories to API: ' + response.status_code)
     except requests.exceptions.HTTPError as http_err:
