@@ -59,6 +59,11 @@ def split_list(lst, n):
     return [lst[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n)]
 
 
+def process_categories(interface, categories):
+    print(interface)
+    print(categories)
+
+
 if __name__ == '__main__':
     all_categories = read_file_to_array('resources/categories.csv')
 
@@ -71,6 +76,4 @@ if __name__ == '__main__':
     for i in range(interfaces_len):
         interface = interfaces[i]
         categories_for_interface = partitioned_categories[i]
-
-        print(interface)
-        print(categories_for_interface)
+        process_categories(interface, categories_for_interface)
