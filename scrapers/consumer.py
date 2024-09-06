@@ -5,6 +5,16 @@ import requests
 import threading
 import random
 
+from bs4 import BeautifulSoup
+import json
+
+
+class CategoryPageParseResult:
+    def __init__(self, raw_json, max_page, current_page):
+        self.raw_json = raw_json
+        self.max_page = max_page
+        self.current_page = current_page
+
 
 class HTTPAdapterWithSocketOptions(requests.adapters.HTTPAdapter):
     def __init__(self, *args, **kwargs):
@@ -95,7 +105,35 @@ def scrape_category(iface, category_url, user_agent):
     }
 
     response = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=10)
-    print(response.text)
+    print(parse(response.text))
+
+
+def parse(raw_content):
+    try:
+        # Parse the HTML content using BeautifulSoup
+        soup = BeautifulSoup(raw_content, 'html.parser')
+        # Extract the data from the element with id "__NEXT_DATA__"
+        data = soup.find(id="__NEXT_DATA__").string
+        # Parse the extracted data as JSON
+        raw_json = json.loads(data)
+
+        # Traverse through the JSON to find the required data
+        pagination_v2 = raw_json['props']['pageProps']['initialData']['searchResult']['paginationV2']
+
+        # Extract the required values
+        max_page = pagination_v2['maxPage']
+        current_page = pagination_v2['pageProperties']['page']
+
+        # Create and return a CategoryPageParseResult object
+        return CategoryPageParseResult(
+            raw_json=json.dumps(raw_json),
+            max_page=max_page,
+            current_page=current_page
+        )
+    except Exception as e:
+        # Log the error message
+        print(f"Exception caught: {e}")
+        return None
 
 
 if __name__ == '__main__':
