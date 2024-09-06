@@ -80,12 +80,11 @@ def split_list(lst, n):
 
 def process_categories(iface, iface_categories, user_agents):
     threads = []
-    results = []
+    raw_contents = []
 
     def thread_target(category, user_agent):
-        result = scrape_category(iface, category, user_agent)
-        if result:
-            results.append(result)
+        response = get_category_page_content(iface, category, user_agent)
+        raw_contents.append(response.text)
 
     for category in iface_categories:
         thread = threading.Thread(
@@ -100,13 +99,7 @@ def process_categories(iface, iface_categories, user_agents):
     for thread in threads:
         thread.join()
 
-    return results
-
-
-def scrape_category(iface, category_url, user_agent):
-    response = get_category_page_content(iface, category_url, user_agent)
-    parsed = parse(response.text)
-    return parsed
+    return raw_contents
 
 
 def get_category_page_content(iface, category_url, user_agent):
@@ -170,23 +163,35 @@ def process_top_level_categories(categories, user_agents):
     interfaces_len = len(interfaces)
     print('INTERFACES: ' + str(interfaces_len))
     partitioned_categories = split_list(categories, interfaces_len)
-    all_results = []
+    all_raw_contents = []
 
+    # Process categories
     for i in range(interfaces_len):
         interface = interfaces[i]
         categories_for_interface = partitioned_categories[i]
-        results = process_categories(interface, categories_for_interface, user_agents)
-        all_results.extend(results)  # Collect results from each interface
+        raw_contents = process_categories(interface, categories_for_interface, user_agents)
+        all_raw_contents.extend(raw_contents)  # Collect raw contents from each interface
 
-    # Process all results, e.g., save them to API
-    for result in all_results:
-        save_category(result.raw_json)  # Assuming `save_category` can handle the raw_json directly
-
+    # Restart interfaces
     for iface in interfaces:
         restart(iface['name'])
 
-    print("Going to wait for 120 sec.")
-    time.sleep(120)
+    # Record start time for waiting
+    start_time = time.time()
+
+    # Parse and send results to API
+    for raw_content in all_raw_contents:
+        result = parse(raw_content)
+        if result:
+            save_category(result.raw_json)  # Assuming `save_category` can handle the raw_json directly
+
+    # Calculate remaining time to wait after processing
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    waiting_time = max(120 - elapsed_time, 0)  # Ensure non-negative waiting time
+
+    print(f"Going to wait for {waiting_time} sec.")
+    time.sleep(waiting_time)
     print("All threads have completed.")
 
 
