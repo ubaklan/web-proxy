@@ -163,31 +163,32 @@ if __name__ == '__main__':
     all_categories = read_file_to_array('resources/categories.csv')
     user_agents = read_file_to_array('resources/user_agents.csv')
 
-    categories = all_categories[:200]
-    interfaces = get_network_interfaces()
-    interfaces_len = len(interfaces)
+    for categories in split_list(all_categories, 200):
+        interfaces = get_network_interfaces()
+        interfaces_len = len(interfaces)
 
-    print('INTERFACES: ' + str(interfaces_len))
-    partitioned_categories = split_list(categories, interfaces_len)
+        print('INTERFACES: ' + str(interfaces_len))
+        partitioned_categories = split_list(categories, interfaces_len)
 
-    threads = []
+        threads = []
 
-    for i in range(interfaces_len):
-        interface = interfaces[i]
-        categories_for_interface = partitioned_categories[i]
-        thread = threading.Thread(
-            target=process_categories,
-            args=(interface, categories_for_interface, user_agents),
-            name=f"Thread-{i + 1}"
-        )
-        thread.start()
-        threads.append(thread)
+        for i in range(interfaces_len):
+            interface = interfaces[i]
+            categories_for_interface = partitioned_categories[i]
+            thread = threading.Thread(
+                target=process_categories,
+                args=(interface, categories_for_interface, user_agents),
+                name=f"Thread-{i + 1}"
+            )
+            thread.start()
+            threads.append(thread)
 
-    for thread in threads:
-        thread.join()
+        for thread in threads:
+            thread.join()
 
-    for iface in interfaces:
-        restart(iface['name'])
+        for iface in interfaces:
+            restart(iface['name'])
 
-    time.sleep(120)
-    print("All threads have completed.")
+        print("Going to wait for 120 sec.")
+        time.sleep(120)
+        print("All threads have completed.")
