@@ -182,11 +182,24 @@ def process_top_level_categories(categories, user_agents):
     # Record start time for waiting
     start_time = time.time()
 
+    save_data_api_threads = []
+
     # Parse and send results to API
     for raw_content in all_raw_contents:
         result = parse(raw_content)
         if result:
-            save_category(result.raw_json)  # Assuming `save_category` can handle the raw_json directly
+            thread = threading.Thread(
+                target=save_category,
+                args=(result.raw_json,)
+            )
+
+            save_data_api_threads.append(thread)
+
+    for thread in save_data_api_threads:
+        thread.start()
+
+    for thread in save_data_api_threads:
+        thread.join()
 
     # Calculate remaining time to wait after processing
     end_time = time.time()
