@@ -164,7 +164,9 @@ def process_top_level_categories(categories, user_agents):
     interfaces = get_network_interfaces()
     interfaces_len = len(interfaces)
     print('INTERFACES: ' + str(interfaces_len))
+    print('Categories len: ' + str(len(categories)))
     partitioned_categories = split_list(categories, interfaces_len)
+    print('Partitioned categories len: ' + str(len(categories)))
     all_raw_contents = []
 
     categories_threads = []
