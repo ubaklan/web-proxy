@@ -8,8 +8,13 @@ import random
 from bs4 import BeautifulSoup
 import json
 import time
-import aiohttp
-import asyncio
+
+
+class CategoryPageParseResult:
+    def __init__(self, raw_json, max_page, current_page):
+        self.raw_json = raw_json
+        self.max_page = max_page
+        self.current_page = current_page
 
 
 class HTTPAdapterWithSocketOptions(requests.adapters.HTTPAdapter):
@@ -101,7 +106,8 @@ def scrape_category(iface, category_url, user_agent):
     }
 
     response = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=120)
-    asyncio.run(save_category(response.text))
+    parsed = parse(response.text)
+    save_category(parsed.raw_json)
 
 
 def parse(raw_content):
@@ -112,30 +118,35 @@ def parse(raw_content):
 
         pagination_v2 = raw_json['props']['pageProps']['initialData']['searchResult']['paginationV2']
 
-        return json.dumps(raw_json)
+        max_page = pagination_v2['maxPage']
+        current_page = pagination_v2['pageProperties']['page']
+
+        return CategoryPageParseResult(
+            raw_json=json.dumps(raw_json),
+            max_page=max_page,
+            current_page=current_page
+        )
     except Exception as e:
         print(f"Exception caught: {e}")
         return None
 
 
-async def save_category(payload_text):
-    payload = parse(payload_text)
+def save_category(payload):
     headers = {
         'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
         'Content-Type': 'application/json'
     }
 
-    url = 'https://core-data-api.threecolts.com/raw-walmart/categories'
-
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.post(url, headers=headers, data=payload, timeout=360) as response:
-                response.raise_for_status()  # Raise an exception for HTTP errors
-                print('Sent categories to API: ' + str(response.status))
-        except aiohttp.ClientResponseError as http_err:
-            print(f"HTTP error occurred: {http_err}")
-        except Exception as err:
-            print(f"Other error occurred: {err}")
+    try:
+        response = requests.post('https://core-data-api.threecolts.com/raw-walmart/categories', headers=headers,
+                                 data=payload, timeout=360)
+        response.raise_for_status()
+        print('Sent categories to API: ' + str(response.status_code))
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except Exception as err:
+        print(f"Other error occurred: {err}")
+    return None
 
 
 def restart(interface):
