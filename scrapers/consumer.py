@@ -171,7 +171,7 @@ def process_top_level_categories(categories, user_agents):
 
     categories_threads = []
 
-    def thread_target(iface, iface_categories, user_agents):
+    def thread_target(_iface, iface_categories):
         response = process_categories(iface, iface_categories, user_agents)
         all_raw_contents.extend(response)
 
