@@ -74,8 +74,7 @@ def get_session(interface):
 
 
 def split_list(lst, n):
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+    return [lst[i:i + n] for i in range(0, len(lst), n)]
 
 
 def process_categories(iface, iface_categories, user_agents):
