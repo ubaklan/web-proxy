@@ -104,7 +104,7 @@ def scrape_category(iface, category_url, user_agent):
                   'application/signed-exchange;v=b3;q=0.7'
     }
 
-    response = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=10)
+    response = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=120)
     parsed = parse(response.text)
     save_category(parsed.raw_json)
 
@@ -138,7 +138,7 @@ def save_category(payload):
 
     try:
         response = requests.post('https://core-data-api.threecolts.com/raw-walmart/categories', headers=headers,
-                                 data=payload)
+                                 data=payload, timeout=360)
         response.raise_for_status()
         print('Sent categories to API: ' + str(response.status_code))
     except requests.exceptions.HTTPError as http_err:
