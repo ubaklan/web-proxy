@@ -152,7 +152,7 @@ if __name__ == '__main__':
     all_categories = read_file_to_array('resources/categories.csv')
     user_agents = read_file_to_array('resources/user_agents.csv')
 
-    categories = all_categories[:100]
+    categories = all_categories[:500]
     interfaces = get_network_interfaces()
     interfaces_len = len(interfaces)
 
