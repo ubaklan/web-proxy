@@ -7,6 +7,7 @@ import random
 
 from bs4 import BeautifulSoup
 import json
+import time
 
 
 class CategoryPageParseResult:
@@ -187,4 +188,6 @@ if __name__ == '__main__':
 
     for iface in interfaces:
         restart(iface['name'])
+
+    time.sleep(120)
     print("All threads have completed.")
