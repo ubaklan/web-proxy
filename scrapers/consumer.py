@@ -11,19 +11,6 @@ import time
 import asyncio
 
 
-def background(f):
-    from functools import wraps
-    @wraps(f)
-    def wrapped(*args, **kwargs):
-        loop = asyncio.get_event_loop()
-        if callable(f):
-            return loop.run_in_executor(None, f, *args, **kwargs)
-        else:
-            raise TypeError('Task must be a callable')
-
-    return wrapped
-
-
 class CategoryPageParseResult:
     def __init__(self, raw_json, max_page, current_page):
         self.raw_json = raw_json
@@ -145,7 +132,6 @@ def parse(raw_content):
         return None
 
 
-@background
 def save_category(payload):
     headers = {
         'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
@@ -175,8 +161,6 @@ def restart(interface):
 
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-
     all_categories = read_file_to_array('resources/categories.csv')
     user_agents = read_file_to_array('resources/user_agents.csv')
 
@@ -209,5 +193,3 @@ if __name__ == '__main__':
         print("Going to wait for 120 sec.")
         time.sleep(120)
         print("All threads have completed.")
-
-    loop.run_forever()
