@@ -86,6 +86,16 @@ def process_categories(iface, iface_categories, user_agents):
 
 def scrape_category(iface, category_url, user_agent):
     print('Scraping ' + category_url + ',' + iface['name'] + ',' + user_agent)
+    headers = {
+        'User-Agent': user_agent,
+        'Content-Type': 'text/plain;text/html',
+        'Accept': 'text/html,application/xhtml+xml,'
+                  'application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,'
+                  'application/signed-exchange;v=b3;q=0.7'
+    }
+
+    response = get_session(iface).get(category_url, headers=headers, allow_redirects=True, timeout=10)
+    print(response)
 
 if __name__ == '__main__':
     all_categories = read_file_to_array('resources/categories.csv')
