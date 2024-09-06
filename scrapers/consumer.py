@@ -71,5 +71,6 @@ if __name__ == '__main__':
     for i in range(interfaces_len):
         interface = interfaces[i]
         categories_for_interface = partitioned_categories[i]
+
         print(interface)
         print(categories_for_interface)
