@@ -115,7 +115,6 @@ def scrape_category(iface, category_url, user_agent):
     save_category(parsed.raw_json)
 
 
-@timing_decorator
 def get_category_page_content(iface, category_url, user_agent):
     headers = {
         'User-Agent': user_agent,
@@ -128,7 +127,6 @@ def get_category_page_content(iface, category_url, user_agent):
     return get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=120)
 
 
-@timing_decorator
 def parse(raw_content):
     try:
         soup = BeautifulSoup(raw_content, 'html.parser')
@@ -150,7 +148,6 @@ def parse(raw_content):
         return None
 
 
-@timing_decorator
 def save_category(payload):
     headers = {
         'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
