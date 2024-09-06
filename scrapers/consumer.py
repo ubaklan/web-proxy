@@ -64,13 +64,12 @@ if __name__ == '__main__':
 
     categories = all_categories[:10]
     interfaces = get_network_interfaces()
+    interfaces_len = len(interfaces)
 
-    partitioned_categories = split_list(categories, 3)
-    print(len(categories))
-    print(interfaces)
-    print(partitioned_categories)
+    partitioned_categories = split_list(categories, interfaces_len)
 
-
-
-    # for interface in interfaces:
-    #     print(interface)
+    for i in range(interfaces_len):
+        interface = interfaces[i]
+        categories_for_interface = partitioned_categories[i]
+        print(interface)
+        print(categories_for_interface)
