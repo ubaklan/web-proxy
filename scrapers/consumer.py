@@ -8,8 +8,9 @@ import random
 from bs4 import BeautifulSoup
 import json
 import time
-import asyncio
+from celery import Celery
 
+app = Celery('tasks', broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
 
 def timing_decorator(func):
     def wrapper(*args, **kwargs):
@@ -148,6 +149,7 @@ def parse(raw_content):
         return None
 
 
+@app.task
 def save_category(payload):
     headers = {
         'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
