@@ -87,10 +87,6 @@ def process_categories(iface, iface_categories, user_agents):
     thread_name = threading.current_thread().name
     thread_id = threading.get_native_id()
 
-    print(f"Thread Name: {thread_name}, Thread ID: {thread_id}")
-    print(iface)
-    print(iface_categories)
-
     threads = []
 
     for category in iface_categories:
@@ -108,7 +104,6 @@ def process_categories(iface, iface_categories, user_agents):
 
 
 def scrape_category(iface, category_url, user_agent):
-    print('Scraping ' + category_url + ',' + iface['name'] + ',' + user_agent)
     response = get_category_page_content(iface, category_url, user_agent)
     parsed = parse(response.text)
     save_category(parsed.raw_json)
@@ -175,7 +170,6 @@ def restart(interface):
         print(str(e))
 
 
-@timing_decorator
 def process_top_level_categories(categories, user_agents):
     interfaces = get_network_interfaces()
     interfaces_len = len(interfaces)
