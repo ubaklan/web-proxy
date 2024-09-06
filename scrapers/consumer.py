@@ -105,36 +105,47 @@ def scrape_category(iface, category_url, user_agent):
     }
 
     response = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=10)
-    print(parse(response.text))
+    parsed = parse(response.text)
+    save_category(parsed.raw_json)
 
 
 def parse(raw_content):
     try:
-        # Parse the HTML content using BeautifulSoup
         soup = BeautifulSoup(raw_content, 'html.parser')
-        # Extract the data from the element with id "__NEXT_DATA__"
         data = soup.find(id="__NEXT_DATA__").string
-        # Parse the extracted data as JSON
         raw_json = json.loads(data)
 
-        # Traverse through the JSON to find the required data
         pagination_v2 = raw_json['props']['pageProps']['initialData']['searchResult']['paginationV2']
 
-        # Extract the required values
         max_page = pagination_v2['maxPage']
         current_page = pagination_v2['pageProperties']['page']
 
-        print(raw_json)
-        # Create and return a CategoryPageParseResult object
         return CategoryPageParseResult(
             raw_json=json.dumps(raw_json),
             max_page=max_page,
             current_page=current_page
         )
     except Exception as e:
-        # Log the error message
         print(f"Exception caught: {e}")
         return None
+
+
+def save_category(payload):
+    headers = {
+        'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
+        'Content-Type': 'application/json'
+    }
+
+    try:
+        response = requests.post('https://core-data-api.threecolts.com/raw-walmart/categories', headers=headers,
+                                 json=payload)
+        response.raise_for_status()
+        print('Sent categories to API: ' + response.status_code)
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except Exception as err:
+        print(f"Other error occurred: {err}")
+    return None
 
 
 if __name__ == '__main__':
