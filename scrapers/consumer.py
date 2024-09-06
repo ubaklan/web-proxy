@@ -57,4 +57,7 @@ def get_session(interface):
 if __name__ == '__main__':
     # categories = read_file_to_array('resources/categories.csv')
     # print(categories[0])
-    print(get_network_interfaces())
+    interfaces = get_network_interfaces()
+
+    for interface in interfaces:
+        print(interface)
