@@ -176,7 +176,7 @@ def restart(interface):
 
 
 @timing_decorator
-def process_categories(categories, user_agents):
+def process_top_level_categories(categories, user_agents):
     interfaces = get_network_interfaces()
     interfaces_len = len(interfaces)
 
@@ -212,4 +212,4 @@ if __name__ == '__main__':
     top_level_user_agents = read_file_to_array('resources/user_agents.csv')
 
     for top_level_categories in split_list(top_level_all_categories, 200):
-        process_categories(top_level_categories, top_level_user_agents)
+        process_top_level_categories(top_level_categories, top_level_user_agents)
