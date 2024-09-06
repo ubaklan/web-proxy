@@ -10,6 +10,7 @@ import json
 import time
 import asyncio
 
+
 def timing_decorator(func):
     def wrapper(*args, **kwargs):
         start_time = time.time()
@@ -18,6 +19,7 @@ def timing_decorator(func):
         execution_time = end_time - start_time
         print(f"Execution time for {func.__name__}: {execution_time:.4f} seconds")
         return result
+
     return wrapper
 
 
@@ -119,6 +121,7 @@ def scrape_category(iface, category_url, user_agent):
     response = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=120)
     parsed = parse(response.text)
     save_category(parsed.raw_json)
+
 
 @timing_decorator
 def parse(raw_content):
