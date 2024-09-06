@@ -66,7 +66,7 @@ if __name__ == '__main__':
     interfaces = get_network_interfaces()
 
     partitioned_categories = split_list(categories, len(interfaces))
-
+    print(len(categories))
     print(interfaces)
     print(partitioned_categories)
     # for interface in interfaces:
