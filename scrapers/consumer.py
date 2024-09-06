@@ -179,9 +179,10 @@ def process_top_level_categories(categories, user_agents):
     for i in range(interfaces_len):
         interface = interfaces[i]
         categories_for_interface = partitioned_categories[i]
+        print('Categories for interface: ' + str(len(categories_for_interface)))
         thread = threading.Thread(
             target=thread_target,
-            args=(interface, categories_for_interface, user_agents)
+            args=(interface, categories_for_interface)
         )
         categories_threads.append(thread)
 
