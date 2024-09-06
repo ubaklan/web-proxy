@@ -67,6 +67,7 @@ if __name__ == '__main__':
 
     partitioned_categories = split_list(categories, len(interfaces))
 
+    print(interfaces)
     print(partitioned_categories)
     # for interface in interfaces:
     #     print(interface)
