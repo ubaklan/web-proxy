@@ -43,7 +43,7 @@ def get_network_interfaces():
         if ni.AF_INET in addrs and addr is not None and is_interface_alive(interface):
             interface_info.append({"name": interface, "addr": addr})
 
-    return jsonify(interfaces=interface_info)
+    return interface_info
 
 
 def get_session(interface):
