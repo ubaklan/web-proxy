@@ -84,7 +84,7 @@ def process_categories(iface, iface_categories):
 
 
 def scrape_category(iface, category_url):
-    print('Scraping ' + category_url + ',' + iface)
+    print('Scraping ' + category_url + ',' + iface.name)
 
 if __name__ == '__main__':
     all_categories = read_file_to_array('resources/categories.csv')
