@@ -3,6 +3,7 @@ import socket
 import netifaces as ni
 import requests
 import threading
+import random
 
 
 class HTTPAdapterWithSocketOptions(requests.adapters.HTTPAdapter):
@@ -59,7 +60,7 @@ def split_list(lst, n):
     return [lst[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n)]
 
 
-def process_categories(iface, iface_categories):
+def process_categories(iface, iface_categories, user_agents):
     thread_name = threading.current_thread().name
     thread_id = threading.get_native_id()
 
@@ -72,7 +73,7 @@ def process_categories(iface, iface_categories):
     for category in iface_categories:
         thread = threading.Thread(
             target=scrape_category,
-            args=(iface, category)
+            args=(iface, category, random.choice(user_agents))
         )
         threads.append(thread)
 
@@ -83,11 +84,12 @@ def process_categories(iface, iface_categories):
         thread.join()
 
 
-def scrape_category(iface, category_url):
+def scrape_category(iface, category_url, user_agent):
     print('Scraping ' + category_url + ',' + iface['name'])
 
 if __name__ == '__main__':
     all_categories = read_file_to_array('resources/categories.csv')
+    user_agents = read_file_to_array('resources/user_agents.csv')
 
     categories = all_categories[:10]
     interfaces = get_network_interfaces()
@@ -103,7 +105,7 @@ if __name__ == '__main__':
         categories_for_interface = partitioned_categories[i]
         thread = threading.Thread(
             target=process_categories,
-            args=(interface, categories_for_interface),
+            args=(interface, categories_for_interface, user_agents),
             name=f"Thread-{i + 1}"
         )
         thread.start()
