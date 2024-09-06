@@ -8,6 +8,20 @@ import random
 from bs4 import BeautifulSoup
 import json
 import time
+import asyncio
+
+
+def background(f):
+    from functools import wraps
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        loop = asyncio.get_event_loop()
+        if callable(f):
+            return loop.run_in_executor(None, f, *args, **kwargs)
+        else:
+            raise TypeError('Task must be a callable')
+
+    return wrapped
 
 
 class CategoryPageParseResult:
@@ -131,6 +145,7 @@ def parse(raw_content):
         return None
 
 
+@background
 def save_category(payload):
     headers = {
         'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
