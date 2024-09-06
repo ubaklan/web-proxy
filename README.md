@@ -72,10 +72,17 @@ sudo systemctl start reverse-ssh-tunnel
 sudo systemctl status reverse-ssh-tunnel
 ```
 
+Proxy VPS:
+```
+sudo nano /etc/ssh/sshd_config
+Add - GatewayPorts yes
+sudo systemctl restart ssh
+
+```
+
 crontab-e
 ```shell
 */5 * * * * sleep 1m ; curl --location --request POST 'http://localhost:3000/restart/usb0' &
 */5 * * * * sleep 2m ; curl --location --request POST 'http://localhost:3000/restart/usb1' &
 */5 * * * * sleep 3m ; curl --location --request POST 'http://localhost:3000/restart/usb2' &
 ```
-
