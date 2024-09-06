@@ -78,6 +78,18 @@ def split_list(lst, n):
     return list(lst[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
 
 
+def split_into_chunks(array, chunk_size=300):
+    # Create a list to hold the chunks
+    chunks = []
+
+    # Iterate over the array and split it into chunks
+    for i in range(0, len(array), chunk_size):
+        chunk = array[i:i + chunk_size]
+        chunks.append(chunk)
+
+    return chunks
+
+
 def process_categories(iface, iface_categories, user_agents):
     threads = []
     raw_contents = []
@@ -233,5 +245,5 @@ if __name__ == '__main__':
     top_level_all_categories = read_file_to_array('resources/categories.csv')
     top_level_user_agents = read_file_to_array('resources/user_agents.csv')
 
-    for top_level_categories in split_list(top_level_all_categories, 300):
+    for top_level_categories in split_into_chunks(top_level_all_categories, 300):
         process_top_level_categories(top_level_categories, top_level_user_agents)
