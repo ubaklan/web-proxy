@@ -113,7 +113,7 @@ def scrape_category(iface, category_url, user_agent):
     print('Scraping ' + category_url + ',' + iface['name'] + ',' + user_agent)
     response = get_category_page_content(iface, category_url, user_agent)
     parsed = parse(response.text)
-    save_category(parsed.raw_json)
+    save_category.delay(parsed.raw_json)
 
 
 def get_category_page_content(iface, category_url, user_agent):
