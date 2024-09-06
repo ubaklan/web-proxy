@@ -176,7 +176,6 @@ def restart(interface):
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_forever()
 
     all_categories = read_file_to_array('resources/categories.csv')
     user_agents = read_file_to_array('resources/user_agents.csv')
@@ -210,3 +209,5 @@ if __name__ == '__main__':
         print("Going to wait for 120 sec.")
         time.sleep(120)
         print("All threads have completed.")
+
+    loop.run_forever()
