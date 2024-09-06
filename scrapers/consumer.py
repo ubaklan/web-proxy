@@ -242,5 +242,5 @@ if __name__ == '__main__':
     top_level_all_categories = read_file_to_array('resources/categories.csv')
     top_level_user_agents = read_file_to_array('resources/user_agents.csv')
 
-    for top_level_categories in split_into_chunks(top_level_all_categories, 100):
+    for top_level_categories in split_into_chunks(top_level_all_categories, 150):
         process_top_level_categories(top_level_categories, top_level_user_agents)
