@@ -137,6 +137,7 @@ def save_category(payload):
     }
 
     try:
+        print(str(payload))
         response = requests.post('https://core-data-api.threecolts.com/raw-walmart/categories', headers=headers,
                                  json=payload)
         response.raise_for_status()
