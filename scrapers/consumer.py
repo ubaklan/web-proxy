@@ -54,10 +54,19 @@ def get_session(interface):
     return session
 
 
+def split_list(lst, n):
+    k, m = divmod(len(lst), n)
+    return [lst[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n)]
+
+
 if __name__ == '__main__':
-    # categories = read_file_to_array('resources/categories.csv')
-    # print(categories[0])
+    all_categories = read_file_to_array('resources/categories.csv')
+
+    categories = all_categories[:10]
     interfaces = get_network_interfaces()
 
-    for interface in interfaces:
-        print(interface)
+    partitioned_categories = split_list(categories, len(interfaces))
+
+    print(partitioned_categories)
+    # for interface in interfaces:
+    #     print(interface)
