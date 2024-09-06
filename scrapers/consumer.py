@@ -75,6 +75,7 @@ if __name__ == '__main__':
     interfaces = get_network_interfaces()
     interfaces_len = len(interfaces)
 
+    print('INTERFACES: ' + interfaces_len)
     partitioned_categories = split_list(categories, interfaces_len)
 
     threads = []
@@ -85,7 +86,7 @@ if __name__ == '__main__':
         thread = threading.Thread(
             target=process_categories,
             args=(interface, categories_for_interface),
-            name=f"Thread-{i+1}"  # Optional: Naming threads for clarity
+            name=f"Thread-{i+1}"
         )
         thread.start()
         threads.append(thread)
