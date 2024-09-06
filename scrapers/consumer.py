@@ -8,9 +8,7 @@ import random
 from bs4 import BeautifulSoup
 import json
 import time
-from celery import Celery
 
-app = Celery('tasks', broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
 
 def timing_decorator(func):
     def wrapper(*args, **kwargs):
@@ -113,7 +111,7 @@ def scrape_category(iface, category_url, user_agent):
     print('Scraping ' + category_url + ',' + iface['name'] + ',' + user_agent)
     response = get_category_page_content(iface, category_url, user_agent)
     parsed = parse(response.text)
-    save_category.delay(parsed.raw_json)
+    save_category(parsed.raw_json)
 
 
 def get_category_page_content(iface, category_url, user_agent):
@@ -149,7 +147,6 @@ def parse(raw_content):
         return None
 
 
-@app.task
 def save_category(payload):
     headers = {
         'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
