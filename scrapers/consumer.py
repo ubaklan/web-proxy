@@ -95,7 +95,8 @@ def scrape_category(iface, category_url, user_agent):
     }
 
     response = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=10)
-    print(response)
+    print(response.text)
+
 
 if __name__ == '__main__':
     all_categories = read_file_to_array('resources/categories.csv')
