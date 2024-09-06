@@ -146,7 +146,8 @@ def parse(raw_content):
         return None
 
 
-def save_category(payload):
+def save_category(raw_content):
+    payload = parse(raw_content)
     headers = {
         'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
         'Content-Type': 'application/json'
@@ -214,14 +215,12 @@ def process_top_level_categories(categories, user_agents):
 
     # Parse and send results to API
     for raw_content in all_raw_contents:
-        result = parse(raw_content)
-        if result:
-            thread = threading.Thread(
-                target=save_category,
-                args=(result.raw_json,)
-            )
+        thread = threading.Thread(
+            target=save_category,
+            args=(raw_content,)
+        )
 
-            save_data_api_threads.append(thread)
+        save_data_api_threads.append(thread)
 
     for thread in save_data_api_threads:
         thread.start()
