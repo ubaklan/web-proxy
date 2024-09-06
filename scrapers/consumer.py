@@ -8,6 +8,8 @@ import random
 from bs4 import BeautifulSoup
 import json
 import time
+import aiohttp
+import asyncio
 
 
 class CategoryPageParseResult:
@@ -106,8 +108,7 @@ def scrape_category(iface, category_url, user_agent):
     }
 
     response = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=120)
-    parsed = parse(response.text)
-    save_category(parsed.raw_json)
+    asyncio.create_task(save_category(response.text))
 
 
 def parse(raw_content):
@@ -131,22 +132,24 @@ def parse(raw_content):
         return None
 
 
-def save_category(payload):
+async def save_category(payload_text):
+    payload = parse(payload_text)
     headers = {
         'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
         'Content-Type': 'application/json'
     }
 
-    try:
-        response = requests.post('https://core-data-api.threecolts.com/raw-walmart/categories', headers=headers,
-                                 data=payload, timeout=360)
-        response.raise_for_status()
-        print('Sent categories to API: ' + str(response.status_code))
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-    except Exception as err:
-        print(f"Other error occurred: {err}")
-    return None
+    url = 'https://core-data-api.threecolts.com/raw-walmart/categories'
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.post(url, headers=headers, data=payload, timeout=360) as response:
+                response.raise_for_status()  # Raise an exception for HTTP errors
+                print('Sent categories to API: ' + str(response.status))
+        except aiohttp.ClientResponseError as http_err:
+            print(f"HTTP error occurred: {http_err}")
+        except Exception as err:
+            print(f"Other error occurred: {err}")
 
 
 def restart(interface):
