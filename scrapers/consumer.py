@@ -148,6 +148,16 @@ def save_category(payload):
     return None
 
 
+def restart(interface):
+    try:
+        print(f'Sending reboot request to {interface}')
+        response = get_session(interface).post('http://192.168.100.1/ajax', json={'funcNo': '1013'}, timeout=2)
+    except requests.exceptions.Timeout:
+        print('timeout, but expected :(')
+    except Exception as e:
+        print(str(e))
+
+
 if __name__ == '__main__':
     all_categories = read_file_to_array('resources/categories.csv')
     user_agents = read_file_to_array('resources/user_agents.csv')
@@ -174,4 +184,7 @@ if __name__ == '__main__':
 
     for thread in threads:
         thread.join()
+
+    for iface in interfaces:
+        restart(iface['name'])
     print("All threads have completed.")
