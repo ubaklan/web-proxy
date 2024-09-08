@@ -164,6 +164,21 @@ def save_category(raw_content):
     return None
 
 
+def get_categories(executors_count):
+    headers = {
+        'x-api-key': 'b9e0cfc7-9ba4-43b9-b38f-3191d1f8d686',
+        'Content-Type': 'application/json'
+    }
+    response = requests.get(
+        'https://core-data-api.threecolts.com/walmart/scrapers/categories?executorsCount=' + str(executors_count),
+        headers=headers,
+        timeout=360
+    )
+    response.raise_for_status()
+
+    return response.json()['categories']
+
+
 def restart(interface):
     try:
         print(f'Sending reboot request to {interface}')
@@ -174,12 +189,12 @@ def restart(interface):
         print(str(e))
 
 
-def process_top_level_categories(categories, user_agents):
+def process_top_level_categories(user_agents):
     try:
         interfaces = get_network_interfaces()
         interfaces_len = len(interfaces)
         print('INTERFACES: ' + str(interfaces_len))
-        print('Categories len: ' + str(len(categories)))
+        categories = get_categories(interfaces_len)
         partitioned_categories = split_list(categories, interfaces_len)
         print('Partitioned categories len: ' + str(len(categories)))
         all_raw_contents = []
@@ -243,9 +258,7 @@ def process_top_level_categories(categories, user_agents):
 
 
 if __name__ == '__main__':
-    top_level_all_categories = read_file_to_array('resources/categories.csv')
     top_level_user_agents = read_file_to_array('resources/user_agents.csv')
 
     while True:
-        for top_level_categories in split_into_chunks(top_level_all_categories, 150):
-            process_top_level_categories(top_level_categories, top_level_user_agents)
+        process_top_level_categories(top_level_user_agents)
