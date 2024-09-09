@@ -122,4 +122,4 @@ if __name__ == '__main__':
             random.choice(top_level_user_agents)
         )
         save_category(response.text)
-        time.sleep(3)
+        time.sleep(1)
