@@ -112,7 +112,7 @@ def is_interface_alive(interface):
 
 
 if __name__ == '__main__':
-    top_level_user_agents = read_file_to_array('resources/user_agents.csv')
+    top_level_user_agents = read_file_to_array('resources/user_agents_new.csv')
     top_level_categories = read_file_to_array('resources/categories.csv')
 
     for category in top_level_categories:
