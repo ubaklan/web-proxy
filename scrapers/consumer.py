@@ -200,7 +200,7 @@ def process_top_level_categories(user_agents):
 
         categories_for_interface = partitioned_categories[0]
         print('Categories for interface: ' + str(len(categories_for_interface)))
-        all_raw_contents = process_categories(interface, interface, user_agents)
+        all_raw_contents = process_categories(interface, categories_for_interface, user_agents)
 
         for thread in categories_threads:
             thread.join()
