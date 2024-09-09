@@ -1,9 +1,11 @@
-import time
-
+import socket
+import netifaces as ni
 import requests
+import threading
 import random
 from bs4 import BeautifulSoup
 import json
+import time
 
 
 class CategoryPageParseResult:
@@ -13,7 +15,29 @@ class CategoryPageParseResult:
         self.current_page = current_page
 
 
-def get_category_page_content(category_url, user_agent):
+class HTTPAdapterWithSocketOptions(requests.adapters.HTTPAdapter):
+    def __init__(self, *args, **kwargs):
+        self.socket_options = kwargs.pop("socket_options", None)
+        super(HTTPAdapterWithSocketOptions, self).__init__(*args, **kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        if self.socket_options is not None:
+            kwargs["socket_options"] = self.socket_options
+        super(HTTPAdapterWithSocketOptions, self).init_poolmanager(*args, **kwargs)
+
+
+def get_network_interfaces():
+    interfaces = ni.interfaces()
+    interface_info = []
+    for interface in interfaces:
+        addrs = ni.ifaddresses(interface)
+        addr = addrs.get(ni.AF_LINK)[0]['addr'] if ni.AF_LINK in addrs else None
+        if ni.AF_INET in addrs and addr is not None and interface != 'wlan0' and is_interface_alive(interface):
+            interface_info.append({"name": interface, "addr": addr})
+    return interface_info
+
+
+def get_category_page_content(iface, category_url, user_agent):
     headers = {
         'User-Agent': user_agent,
         'Content-Type': 'text/plain;text/html',
@@ -22,9 +46,17 @@ def get_category_page_content(category_url, user_agent):
                   'application/signed-exchange;v=b3;q=0.7'
     }
     print('Making a request to category: ' + category_url)
-    result = requests.get(category_url, headers=headers, allow_redirects=True, timeout=60)
+    result = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=60)
     print('Got response from walmart')
     return result
+
+
+def get_session(interface):
+    adapter = HTTPAdapterWithSocketOptions(socket_options=[(socket.SOL_SOCKET, 25, interface.encode('utf-8'))])
+    session = requests.session()
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
 
 
 def parse(raw_content):
@@ -76,6 +108,10 @@ if __name__ == '__main__':
     top_level_categories = read_file_to_array('resources/categories.csv')
 
     for category in top_level_categories:
-        response = get_category_page_content(category, random.choice(top_level_user_agents))
+        response = get_category_page_content(
+            get_network_interfaces()[0],
+            category,
+            random.choice(top_level_user_agents)
+        )
         save_category(response.text)
         time.sleep(3)
