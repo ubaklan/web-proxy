@@ -103,6 +103,14 @@ def read_file_to_array(filename):
     return lines
 
 
+def is_interface_alive(interface):
+    try:
+        response = get_session(interface).head('https://google.com', timeout=0.5)
+        return response.status_code < 400
+    except Exception:
+        return False
+
+
 if __name__ == '__main__':
     top_level_user_agents = read_file_to_array('resources/user_agents.csv')
     top_level_categories = read_file_to_array('resources/categories.csv')
