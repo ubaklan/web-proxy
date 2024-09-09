@@ -224,6 +224,9 @@ def process_top_level_categories(user_agents):
         for thread in save_data_api_threads:
             thread.start()
 
+        for thread in save_data_api_threads:
+            thread.join()
+
         # Calculate remaining time to wait after processing
         end_time = time.time()
         elapsed_time = end_time - start_time
