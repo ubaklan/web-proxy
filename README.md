@@ -110,6 +110,7 @@ Start and test:
 sudo systemctl daemon-reload
 sudo systemctl enable scrapers.service
 sudo systemctl start scrapers.service
+sudo systemctl stop scrapers.service
 sudo systemctl status scrapers.service
 ```
 

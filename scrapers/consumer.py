@@ -191,38 +191,20 @@ def restart(interface):
 
 def process_top_level_categories(user_agents):
     try:
-        interfaces = list(get_network_interfaces()[1])
-        interfaces_len = len(interfaces)
-        print('INTERFACES: ' + str(interfaces_len))
-        categories = get_categories(interfaces_len)
-        partitioned_categories = split_list(categories, interfaces_len)
+        interface = get_network_interfaces()[0]
+        categories = get_categories(1)
+        partitioned_categories = split_list(categories, 1)
         print('Partitioned categories len: ' + str(len(categories)))
-        all_raw_contents = []
-
         categories_threads = []
 
-        def thread_target(_iface, iface_categories):
-            response = process_categories(_iface, iface_categories, user_agents)
-            all_raw_contents.extend(response)
-
-        # Process categories
-        for i in range(interfaces_len):
-            interface = interfaces[i]
-            categories_for_interface = partitioned_categories[i]
-            print('Categories for interface: ' + str(len(categories_for_interface)))
-            thread = threading.Thread(
-                target=thread_target,
-                args=(interface, categories_for_interface)
-            )
-            categories_threads.append(thread)
-            thread.start()
+        categories_for_interface = partitioned_categories[0]
+        print('Categories for interface: ' + str(len(categories_for_interface)))
+        all_raw_contents = process_categories(interface, interface, user_agents)
 
         for thread in categories_threads:
             thread.join()
 
-        # Restart interfaces
-        for iface in interfaces:
-            restart(iface['name'])
+        restart(interface['name'])
 
         # Record start time for waiting
         start_time = time.time()
@@ -247,7 +229,7 @@ def process_top_level_categories(user_agents):
         # Calculate remaining time to wait after processing
         end_time = time.time()
         elapsed_time = end_time - start_time
-        waiting_time = max(120 - elapsed_time, 0)  # Ensure non-negative waiting time
+        # waiting_time = max(120 - elapsed_time, 0)  # Ensure non-negative waiting time
 
         # print(f"Going to wait for {waiting_time} sec.")
         # time.sleep(waiting_time)
