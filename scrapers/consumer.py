@@ -192,6 +192,7 @@ def restart(interface):
 def process_top_level_categories(user_agents):
     try:
         interface = get_network_interfaces()[0]
+        print(interface)
         categories = get_categories(1)
         partitioned_categories = split_list(categories, 1)
         print('Partitioned categories len: ' + str(len(categories)))
