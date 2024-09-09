@@ -191,7 +191,7 @@ def restart(interface):
 
 def process_top_level_categories(user_agents):
     try:
-        interfaces = get_network_interfaces()
+        interfaces = list(get_network_interfaces()[1])
         interfaces_len = len(interfaces)
         print('INTERFACES: ' + str(interfaces_len))
         categories = get_categories(interfaces_len)
@@ -249,8 +249,8 @@ def process_top_level_categories(user_agents):
         elapsed_time = end_time - start_time
         waiting_time = max(120 - elapsed_time, 0)  # Ensure non-negative waiting time
 
-        print(f"Going to wait for {waiting_time} sec.")
-        time.sleep(waiting_time)
+        # print(f"Going to wait for {waiting_time} sec.")
+        # time.sleep(waiting_time)
         print("All threads have completed.")
     except Exception as e:
         print('Exception received: ' + str(e))

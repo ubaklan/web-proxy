@@ -80,6 +80,39 @@ sudo systemctl restart ssh
 
 ```
 
+
+# Scrapers service setup:
+```shell
+sudo nano /etc/systemd/system/scrapers.service
+```
+
+Content:
+```shell
+[Unit]
+Description=Scrapers
+After=network-online.target
+
+[Service]
+User=vladimir
+WorkingDirectory=/home/vladimir/web-proxy/scrapers
+ExecStart=/home/vladimir/web-proxy/scrapers/venv/bin/python3 /home/vladimir/web-proxy/scrapers/consumer.py
+Restart=always
+RestartSec=15s
+KillMode=process
+User=vladimir
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Start and test:
+```shell
+sudo systemctl daemon-reload
+sudo systemctl enable scrapers.service
+sudo systemctl start scrapers.service
+sudo systemctl status scrapers.service
+```
+
 crontab-e
 ```shell
 */5 * * * * sleep 1m ; curl --location --request POST 'http://localhost:3000/restart/usb0' &
