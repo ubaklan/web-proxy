@@ -118,9 +118,13 @@ if __name__ == '__main__':
     top_level_categories = read_file_to_array('resources/categories.csv')
 
     for category in top_level_categories:
-        response = get_category_page_content(
-            get_network_interfaces()[0],
-            category,
-            random.choice(top_level_user_agents)
-        )
-        save_category(response.text)
+        try:
+            response = get_category_page_content(
+                get_network_interfaces()[0],
+                category,
+                random.choice(top_level_user_agents)
+            )
+            save_category(response.text)
+        except Exception as e:
+            print('Exception received: ' + str(e))
+            time.sleep(60)
