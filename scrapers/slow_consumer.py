@@ -50,6 +50,7 @@ def get_category_page_content(iface, category_url, user_agent):
     print(str(time.ctime()) + ', making a request to category: ' + category_url + ',' + iface['name'])
     result = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=60)
     print('Got response from walmart')
+    print(result)
     return result
 
 
