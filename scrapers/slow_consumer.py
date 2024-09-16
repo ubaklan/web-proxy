@@ -116,16 +116,24 @@ def is_interface_alive(interface):
 if __name__ == '__main__':
     top_level_user_agents = read_file_to_array('resources/user_agents_new.csv')
     top_level_categories = read_file_to_array('resources/categories.csv')
+    #
 
-    while True:
-        for category in top_level_categories:
-            try:
-                response = get_category_page_content(
-                    get_network_interfaces()[0],
-                    category,
-                    random.choice(top_level_user_agents)
-                )
-                save_category(response.text)
-            except Exception as e:
-                print('Exception received: ' + str(e))
-                time.sleep(60)
+    response = get_category_page_content(
+        get_network_interfaces()[0],
+        'https://www.walmart.com/reviews/product/774784172?vp=true',
+        random.choice(top_level_user_agents)
+    )
+
+
+    # while True:
+    #     for category in top_level_categories:
+    #         try:
+    #             response = get_category_page_content(
+    #                 get_network_interfaces()[0],
+    #                 category,
+    #                 random.choice(top_level_user_agents)
+    #             )
+    #             save_category(response.text)
+    #         except Exception as e:
+    #             print('Exception received: ' + str(e))
+    #             time.sleep(60)
