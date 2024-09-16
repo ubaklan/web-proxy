@@ -9,7 +9,6 @@ import time
 import datetime
 
 
-
 class CategoryPageParseResult:
     def __init__(self, raw_json, max_page, current_page):
         self.raw_json = raw_json
@@ -50,7 +49,6 @@ def get_category_page_content(iface, category_url, user_agent):
     print(str(time.ctime()) + ', making a request to category: ' + category_url + ',' + iface['name'])
     result = get_session(iface['name']).get(category_url, headers=headers, allow_redirects=True, timeout=60)
     print('Got response from walmart')
-    print(result.text)
     return result
 
 
@@ -117,24 +115,16 @@ def is_interface_alive(interface):
 if __name__ == '__main__':
     top_level_user_agents = read_file_to_array('resources/user_agents_new.csv')
     top_level_categories = read_file_to_array('resources/categories.csv')
-    #
 
-    response = get_category_page_content(
-        get_network_interfaces()[0],
-        'https://www.walmart.com/reviews/product/774784172?vp=true',
-        random.choice(top_level_user_agents)
-    )
-
-
-    # while True:
-    #     for category in top_level_categories:
-    #         try:
-    #             response = get_category_page_content(
-    #                 get_network_interfaces()[0],
-    #                 category,
-    #                 random.choice(top_level_user_agents)
-    #             )
-    #             save_category(response.text)
-    #         except Exception as e:
-    #             print('Exception received: ' + str(e))
-    #             time.sleep(60)
+    while True:
+        for category in top_level_categories:
+            try:
+                response = get_category_page_content(
+                    get_network_interfaces()[0],
+                    category,
+                    random.choice(top_level_user_agents)
+                )
+                save_category(response.text)
+            except Exception as e:
+                print('Exception received: ' + str(e))
+                time.sleep(60)
